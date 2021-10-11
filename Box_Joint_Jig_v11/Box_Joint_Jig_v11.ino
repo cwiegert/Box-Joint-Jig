@@ -192,46 +192,46 @@
         if ( DEBUG)
         {
           Serial.println("_________________________________________________________________________________________________________________________");
-          Serial.print ("directionPin ==> ");
+          Serial.print (F("directionPin ==> "));
           Serial.println(directionPin);
-          Serial.print ("sledDirPin ==> ");
+          Serial.print (F("sledDirPin ==> "));
           Serial.println(sledDirPin);
-          Serial.print("stepPin ==> ");
+          Serial.print(F("stepPin ==> "));
           Serial.println(stepPin);
-          Serial.print ("sledStepPin ==> ");
+          Serial.print (F("sledStepPin ==> "));
           Serial.println(sledStepPin);
-          Serial.print ("enablePin ==> ");
+          Serial.print (F("enablePin ==> "));
           Serial.println(enablePin);
-          Serial.print("sledEnablePin ==> ");
+          Serial.print(F("sledEnablePin ==> "));
           Serial.println(sledEnablePin);
-          Serial.print ("initSpeed ==> ");
+          Serial.print (F("initSpeed ==> "));
           Serial.println (initSpeed);
     
-          Serial.print("stepsPerRevolution ==> ");
+          Serial.print(F("stepsPerRevolution ==> "));
           Serial.println(stepsPerRevolution);
-          Serial.print("microPerStep ==> ");
+          Serial.print(F("microPerStep ==> "));
           Serial.println(microPerStep);
-          Serial.print("pulseWidthMicros ==> ");
+          Serial.print(F("pulseWidthMicros ==> "));
           Serial.println(pulseWidthMicros);
-          Serial.print ("millisBetweenSteps ==> ");
+          Serial.print (F("millisBetweenSteps ==> "));
           Serial.println(millisBetweenSteps);
-          Serial.print ("RIGHT_LIMIT ==> ");
+          Serial.print (F("RIGHT_LIMIT ==> "));
           Serial.println(RIGHT_LIMIT);
-          Serial.print("LEFT_LIMIT ==> ");
+          Serial.print(F("LEFT_LIMIT ==> "));
           Serial.println(LEFT_LIMIT);
-          Serial.print("FRONT_LIMIT ==>");
+          Serial.print(F("FRONT_LIMIT ==>"));
           Serial.println (FRONT_LIMIT);
-          Serial.print ("BACK_LIMIT ==> ");
+          Serial.print (F("BACK_LIMIT ==> "));
           Serial.println(BACK_LIMIT);
-          Serial.print ("SAW_ZERO ==> ");
+          Serial.print (F("SAW_ZERO ==> "));
           Serial.println(SAW_ZERO);
-          Serial.print ("maxAcceleartion ==> ");
+          Serial.print (F("maxAcceleartion ==> "));
           Serial.println(maxAcceleration);
-          Serial.print("distPerStep ==> ");
+          Serial.print(F("distPerStep ==> "));
           Serial.println(distPerStep, 8);
-          Serial.print("maxMotorSpeed == > ");
+          Serial.print(F("maxMotorSpeed == > "));
           Serial.println(maxMotorSpeed);
-          Serial.print("workingMotorSpeed ==> ");
+          Serial.print(F("workingMotorSpeed ==> "));
           Serial.println(workingMotorSpeed);
     
         }
@@ -452,13 +452,13 @@
        if (DEBUG)
         {
           Serial.println("");
-          Serial.print ("total fingers ==> " );
+          Serial.print (F("total fingers ==> " ));
           Serial.println(totFingers, 4);
-          Serial.print ("finger Steps ==> " );
+          Serial.print (F("finger Steps ==> " ));
           Serial.println(fingerSteps, 4);
-          Serial.print ("kerf Steps ==> ");
+          Serial.print (F("kerf Steps ==> "));
           Serial.println(kerfSteps, 4);
-          Serial.print ("stock Steps ==> " );
+          Serial.print (F("stock Steps ==> " ));
           Serial.println(stockSteps, 4);
         }
     }
@@ -775,8 +775,6 @@
           while (digitalRead(BACK_LIMIT))
             sSled.runSpeed(); 
           backLimit = 0;
-          Serial.print ("backlimit prior to eEPROM ==> ");
-          Serial.println(backLimit);
           EEPROM.put(BACK_SLED,backLimit);
           Serial.println(EEPROM[BACK_SLED]);
           sSled.setCurrentPosition (0);
@@ -796,8 +794,6 @@
             sSled.runSpeed();
           frontLimit = sSled.currentPosition();
           EEPROM.put(FRONT_SLED, frontLimit);
-          Serial.print (EEPROM[FRONT_SLED]);
-          delay(500);
           // Move the sled back to the 0 position on the left limit switch
           sSled.moveTo(backLimit);
           while (sSled.currentPosition() > backLimit)
