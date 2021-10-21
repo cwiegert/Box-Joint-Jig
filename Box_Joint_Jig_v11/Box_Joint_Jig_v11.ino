@@ -2,7 +2,7 @@
     This code is for a project to automate a Box Joint jig on a tablesaw.   The jig will have a sled to move the wood tenons on the x axis to
     cut the toungs and the groves, and a z axis to move the sled through the saw.
 
-    The original version of the code was written by Cory D. Wiegert and can be found at <fill in git repository>
+    The original version of the code was written by Cory D. Wiegert and can be found at https://github.com/cwiegert/Box-Joint-Jig
 
       Will need to know:
         1)   width of saw blade
@@ -12,7 +12,7 @@
 
      
   NEW VERSION - Cory Wiegert   08/29/2021
-    v         Don't know how I am going to write the code yet - but let's get started
+    v 1.1           First version of the software avaialbe in the public Git.  
 
 ****************************************************************************************************************************************/
 #include <AccelStepper.h>
