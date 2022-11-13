@@ -1,3 +1,4 @@
+
 /**************************************************************************************************
  * Test program to figure out if we can use EEPROM to store variables for setup and managmement
  * Would like to have a tool that allows us to set EEPROM for each stepper motor, so we don't have to 
@@ -32,14 +33,14 @@
 #define SET_ADDRESS 0
 #define HEIGHT_ADDRESS 50
  
-        byte    directionPin = 32;             //  pin that will go to the D+ on the stepper controller  have to declare here, as the stepper is a global class
-        byte    sledDirPin = 12;               //  pin that will go to the D+ on the sled stepper controller.   Have to declare here as the stepper is a global class
-        byte    stepPin = 13;                  //  pin that will wire to the P+ (pulse) on the stepper controlloer   have to declare here as the stepper is a global class
-        byte    sledStepPin = 33;              //  pin that will wire to the P+ (pulse) on the Fence stepper controlloer   have to declare here as the stepper is a global class
-        byte    enablePin = 6;                 //  pin that will wire to the E+ on the stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
-        byte    sledEnablePin = 36;            //  pin that will wire to the E+ on the fence stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
+        uint8_t    directionPin = 40;             //  pin that will go to the D+ on the stepper controller  have to declare here, as the stepper is a global class
+        uint8_t    sledDirPin = 38;               //  pin that will go to the D+ on the sled stepper controller.   Have to declare here as the stepper is a global class
+        uint8_t    stepPin = 34;                  //  pin that will wire to the P+ (pulse) on the stepper controlloer   have to declare here as the stepper is a global class
+        uint8_t    sledStepPin = 36;              //  pin that will wire to the P+ (pulse) on the Fence stepper controlloer   have to declare here as the stepper is a global class
+        uint8_t    enablePin = 35;                 //  pin that will wire to the E+ on the stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
+        uint8_t    sledEnablePin = 39;            //  pin that will wire to the E+ on the fence stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
         int     initSpeed = 4000;              //  sets the initial speed of the motor.   Don't think we need acceleration in the router, but will find out
-        long    maxMotorSpeed = 20000;         //  as defined - maximum speed motor will run.   Sets the 100% on the speed slider
+        long    maxMotorSpeed = 50000;         //  as defined - maximum speed motor will run.   Sets the 100% on the speed slider
         int     maxAcceleration = 2000;        //  maximum number of steps for acceleration
         long    workingMotorSpeed = 4000;      //  active working speed, set by the slider, and will be somewhere between 0 and 100%
         int     stepsPerRevolution = 1600;     //  number of steps required for 1 revolution of leadscrew
@@ -47,11 +48,12 @@
         float   distPerStep = 0.00024606;      //  inches per step with calculated off <microPerStep> = 8
         int     pulseWidthMicros = 20;         //  miliseconds  -- delay for the steps.   the higher the number the slower the lead screw will turn
         int     millisBetweenSteps = 20;       //  milliseconds - or try 1000 for slower steps   delay between pulses sent to the controller
-        byte    RIGHT_LIMIT = 35;
-        byte    LEFT_LIMIT = 34;
-        byte    FRONT_LIMIT=40;
-        byte    BACK_LIMIT=41; 
-        byte    SAW_ZERO = 44;
+        byte    RIGHT_LIMIT = 46;
+        byte    LEFT_LIMIT = 44;
+        byte    FRONT_LIMIT=45;
+        byte    BACK_LIMIT=23; 
+        byte    SAW_ZERO = 13;
+        byte    jPin = 9;
         SdFat   sdCard;                        //  pointer to the SD card reader.   Used in storing config and memory files
         int     eeAddress =500;
   
@@ -63,7 +65,7 @@
           char   label[30];
         }  preSetLookup; 
   
- int  boardMemory = 4096;     // This is for a MEGA
+int  boardMemory = 4096;     // This is for a MEGA
 
  void clearEEProm ( int boardSize)
   {
@@ -186,7 +188,7 @@ int loadHeightsFromFile(int move_go) {
 
 void setup() 
   {
-    Serial.begin(250000);
+    Serial.begin(500000);
       delay (1000);
    pinMode(SD_WRITE, OUTPUT);       // define the SD card writing pin
         
@@ -200,26 +202,26 @@ void loop()
     char   serGet;
     int     nTemp = 0;
     debugLn ("");
-    debugLn ("enter an <X> if you want to clear the EEPROM");
-    debugLn ("enter an <S> if you want to load the settings to EEPROM");
-    debugLn ("enter an <I> if you want to get the settings from EEPROM");
-    debugLn ("enter an <H> if you what the Heights file loaded");
-    debugLn ("enter an <R> if you want to read the first heights values from EEPROM");
-    debugLn ("    enter an <N> if you want to read the next Heights values");
-    debugLn ("enter <C> if you want size of structure");
-    debugLn ("enter <L> if you want to see what's in EEPROM");
+    debugLn ("enter an <0> if you want to clear the EEPROM");
+    debugLn ("enter an <1> if you want to load the settings to EEPROM");
+    debugLn ("enter an <2> if you want to get the settings from EEPROM");
+    debugLn ("enter an <3> if you what the Heights file loaded");
+    debugLn ("enter an <4> if you want to read the first heights values from EEPROM");
+    debugLn ("    enter an <5> if you want to read the next Heights values");
+    debugLn ("enter <6> if you want size of structure");
+    debugLn ("enter <7> if you want to see what's in EEPROM");
 
     while (Serial.available()==0);
     serGet = Serial.read();
     
     switch (serGet)
       {
-          case 'X':
+          case '0':
             {
               clearEEProm(boardMemory);
               break;
             }
-          case 'S':
+          case '1':
             {
                 eeAddress = 0;
                 debugLn("");
@@ -264,6 +266,9 @@ void loop()
                 eeAddress += sizeof(maxMotorSpeed);
                 EEPROM.put(eeAddress, workingMotorSpeed);
                 eeAddress += sizeof(workingMotorSpeed);
+                EEPROM.put(eeAddress, jPin);
+                eeAddress += sizeof(jPin);
+                
                 nTemp = EEPROM[boardMemory - 1];
                 if ((nTemp < eeAddress) || nTemp == 255)
                   {
@@ -271,7 +276,7 @@ void loop()
                   } 
                 break;
             }
-          case 'I':
+          case '2':
             {
                 eeAddress = 0;
                 EEPROM.get (eeAddress, directionPin);
@@ -304,7 +309,7 @@ void loop()
                 eeAddress += sizeof (FRONT_LIMIT);
                 EEPROM.get(eeAddress, BACK_LIMIT);
                 eeAddress += sizeof (BACK_LIMIT);
-                SAW_ZERO = EEPROM[eeAddress];
+                EEPROM.get(eeAddress, SAW_ZERO);
                 eeAddress += sizeof(SAW_ZERO);
                 EEPROM.get(eeAddress, maxAcceleration);
                 eeAddress += sizeof(maxAcceleration);
@@ -314,6 +319,9 @@ void loop()
                 eeAddress += sizeof(maxMotorSpeed);
                 EEPROM.get(eeAddress, workingMotorSpeed);
                 eeAddress += sizeof(workingMotorSpeed);
+                EEPROM.get(eeAddress, jPin);
+                eeAddress += sizeof(jPin);
+
         
                 debugLn("_________________________________________________________________________________________________________________________");
                 Serial.print ("directionPin ==> ");
@@ -356,23 +364,25 @@ void loop()
                 debugLn(maxMotorSpeed);
                 debug("workingMotorSpeed ==> ");
                 debugLn(workingMotorSpeed);
+                debug("Joystick Power Pin ==> ");
+                debugLn(jPin);
                 break;
             }  
-         case 'H':
+         case '3':
           {
             eeAddress = HEIGHT_ADDRESS;
             eeAddress = loadHeightsFromFile(1);
-            EEPROM.put(4095, eeAddress);
+            EEPROM.put(boardMemory - 3, eeAddress);
             break;
           }  
-          case 'C':
+          case '6':
             {
               debug ("Size of the preset lookup structure ==> ");
               debugLn(sizeof(preSetLookup));
               debugLn("");
               break;
             }
-          case 'L':
+          case '7':
             for (int x = 0; x< boardMemory; x++)
               {
                 debug (x);
@@ -380,7 +390,7 @@ void loop()
                 debugLn (EEPROM.read(x));
               }
             break;
-          case 'R':
+          case '4':
             {
             // eeAddress = sizeof(preSetLookup);
               eeAddress = HEIGHT_ADDRESS;
@@ -393,7 +403,7 @@ void loop()
         //      eeAddress += sizeof(preSetLookup);
               break;
             }
-          case 'N':
+          case '5':
             {
               eeAddress += sizeof(preSetLookup);
               EEPROM.get(eeAddress,preSetLookup);

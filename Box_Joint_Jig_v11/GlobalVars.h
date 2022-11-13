@@ -13,18 +13,29 @@
  *********************************************************/
 
 
-#define FRONT_SLED 4000 
+/*#define FRONT_SLED 4000 
 #define BACK_SLED  4005 
 #define RIGHT_CAR  4010
-#define LEFT_CAR   4015
+#define LEFT_CAR   4015*/
 
+      
 
-    byte        RIGHT_LIMIT;         //  Limit switch on right slide of slide
-    byte        LEFT_LIMIT;          //  Limit switch on left side of slide
-    byte        FRONT_LIMIT;         //  Limit switch after going through saw
-    byte        BACK_LIMIT;          //  Limit switch on back of sled
-    byte        SAW_ZERO;            //  limit switch for 0'ing carrage to right side of blade
-    const PROGMEM int   SD_WRITE = 53;       //  CS pin of the SD card
+    const PROGMEM int FRONT_SLED = 4000; 
+    const PROGMEM int BACK_SLED = 4005;
+    const PROGMEM int RIGHT_CAR = 4010;
+    const PROGMEM int LEFT_CAR = 4015;
+
+    const PROGMEM uint8_t   directionPin = 40;             //  pin that will go to the D+ on the stepper controller  have to declare here, as the stepper is a global class
+    const PROGMEM uint8_t    sledDirPin = 38;               //  pin that will go to the D+ on the sled stepper controller.   Have to declare here as the stepper is a global class
+    const PROGMEM uint8_t    stepPin = 34;                  //  pin that will wire to the P+ (pulse) on the stepper controlloer   have to declare here as the stepper is a global class
+    const PROGMEM uint8_t    sledStepPin = 36;              //  pin that will wire to the P+ (pulse) on the Fence stepper controlloer   have to declare here as the stepper is a global class
+    const PROGMEM uint8_t    enablePin = 35;                 //  pin that will wire to the E+ on the stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
+    const PROGMEM uint8_t    sledEnablePin = 39;            //  pin that will wire to the E+ on the fence stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
+    const PROGMEM int        SD_WRITE = 53;                      //  CS pin of the SD card
+    const PROGMEM int        nCutDelay = 200;                   //  microseconds between sled cycles.   Pauses the autocut for a tiny bit so we aren't hammering the motor
+    const PROGMEM int        xPin = A2;
+    const PROGMEM int        yPin = A1;
+    
     /*_______________________________________________________________________________________________________________*/
         
     const PROGMEM byte  RIGHT_EDGE = 0;       //  right edge of a finger
@@ -32,28 +43,24 @@
     const PROGMEM byte  HOG_OUT = 2;          //  cleaning out the slot
     /*_______________________________________________________________________________________________________________*/
     
-    /*
-               Code for the stepper motor controller.   Need to set the appropriate pins for the digital write and signal
-                These wires go to the stepper controller, not the stepper directely
-                directionPin and stepPin must be set prior to the AccelStepper object create.   Can not set them through a config file
-    */
     
-    const  PROGMEM byte   iStopPin = 2;           // PIn  for the interupt to stop everything.    must be 2 or 3 on the NANO, 2,3,18,19.on the Mega
-    const  PROGMEM byte   directionPin = 11 ;            //  pin that will go to the D+ on the stepper controller  have to declare here, as the stepper is a global class
-    const  PROGMEM byte   sledDirPin= 32;                //  pin that will go to the D+ on the sled stepper controller.   Have to declare here as the stepper is a global class
-    const  PROGMEM byte   stepPin = 13;                  //  pin that will wire to the P+ (pulse) on the stepper controlloer   have to declare here as the stepper is a global class
-    const  PROGMEM byte   sledStepPin =33;               //  pin that will wire to the P+ (pulse) on the Fence stepper controlloer   have to declare here as the stepper is a global class
-    byte   enablePin;                     //  pin that will wire to the E+ on the stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
-    byte   sledEnablePin;                 //  pin that will wire to the E+ on the fence stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
-    int    initSpeed;                     //  sets the initial speed of the motor.   Don't think we need acceleration in the router, but will find out
+    byte    RIGHT_LIMIT;
+    byte    LEFT_LIMIT;
+    byte    FRONT_LIMIT;
+    byte    BACK_LIMIT; 
+    byte    SAW_ZERO;
+    int     iStopPin = 3;           // PIn  for the interupt to stop everything.    must be 2 or 3 on the NANO, 2,3,18,19.on the Mega
+    int     initSpeed ;              //  sets the initial speed of the motor.   Don't think we need acceleration in the router, but will find out
+   
     long   maxMotorSpeed;                 //  as defined - maximum speed motor will run.   Sets the 100% on the speed slider
     int    maxAcceleration;               //  maximum number of steps for acceleration
     long   workingMotorSpeed;             //  active working speed, set by the slider, and will be somewhere between 0 and 100%
-    const  PROGMEM int    stepsPerRevolution = 1600;     //  number of steps required for 1 revolution of leadscrew
-    const  PROGMEM int    microPerStep = 8;              //  number of microSteps.   Set on the TB600 controller by dip switch   Off | On | Off
-    const  PROGMEM float  distPerStep = 0.00024606;      //  inches per step with calculated off <microPerStep> = 8
-    const  PROGMEM int    pulseWidthMicros =20;          //  miliseconds  -- delay for the steps.   the higher the number the slower the lead screw will turn
-    const  PROGMEM int    millisBetweenSteps =20;        //  milliseconds - or try 1000 for slower steps   delay between pulses sent to the controller
+    int    stepsPerRevolution;     //  number of steps required for 1 revolution of leadscrew
+    int    microPerStep;              //  number of microSteps.   Set on the TB600 controller by dip switch   Off | On | Off
+    float  distPerStep;      //  inches per step with calculated off <microPerStep> = 8
+    int    pulseWidthMicros;          //  miliseconds  -- delay for the steps.   the higher the number the slower the lead screw will turn
+    int    millisBetweenSteps;        //  milliseconds - or try 1000 for slower steps   delay between pulses sent to the controller
+    
     /*_______________________________________________________________________________________________________________*/
     
     long   rightOfBlade;                 //  Right side of blade, used to 0 out carraige prior to starting the cut
@@ -69,42 +76,36 @@
     float   totFingers;                   //  number of fingers to cut in the stock
     float   stockWidth;                   //  width of the wood stock being cut
     float   firstCutRightSaw;             //  step position of the first cut of a finger;   Used to assess when done hogging flot
-    byte    whereSaw;                     //  where in the cut process are we?   valid values:  RIGHT_EDGE, LEFT_EDGE, HOG_OUT
+    float   zeroPosition;                 //  right edge of stock, used to calculate positioning carraige against blade
+    int    whereSaw;                     //  where in the cut process are we?   valid values:  RIGHT_EDGE, LEFT_EDGE, HOG_OUT
     boolean bCarrMoved;                   //  flag to test whether to cycle the sled.   Initialized in NextCut();
     int     currFinger;                   //  current finger that is being cut
     int     fingerCounter = 0;            //  counter for comparing to currFinger
-    byte    moveCarriage = 22;            //  mechanical button to manually tell carriage to move to next cut    
+    int    moveCarriage = 22;            //  mechanical button to manually tell carriage to move to next cut    
     uint32_t     bInverted = 0;
     char    errorTxt[200] = {'\0'};
     
     /*_______________________________________________________________________________________________________________*/
     
     long   curPos;                        //  return value from CurrentPosition() call on the stepper
-    byte   DIRECTION;                     //  tests the direction the motor should be turning
-    byte   HOME_MOTOR = 1;                //  Used with the swFence switch to tell which motor to use when zeroing and resetting
-    byte   SET_MOTOR = 1;                 //  Used on the Settings Screen to tell which motor to use when resetting calibrations
+    int   DIRECTION;                     //  tests the direction the motor should be turning
+    int   HOME_MOTOR = 1;                //  Used with the swFence switch to tell which motor to use when zeroing and resetting
+    int   SET_MOTOR = 1;                 //  Used on the Settings Screen to tell which motor to use when resetting calibrations
     int    stepSize = 3;                  //  used in the moving of the router to set precision on how large the steps should be for the runToPosition() function
     char   CR = '\n';                     //  Carraige return constant, used for the writeDebug function to add a new line at the end of the function
     uint32_t    bStop = 0;                //  used as a flag to test if the stop button has been pressed.
     int     eeAddress;
     int     DEBUG = 1;
-    const  PROGMEM byte    xPin = A0;
-    const  PROGMEM byte    yPin = A1;
-    const  PROGMEM byte    jPin = 9;
+    byte    jPin;
     int     xVal;
     int     yVal;
-    int     jONOff = LOW;
+    int     aveRead_x;
+    int     aveRead_y;
+    byte    jONOff = HIGH;               // joystick power setting   LOW = off, HIGH = on
+    int     xAxisLock = 1;
+    int     yAxisLock = 1;
 
     
-    struct inchCacl 
-      {
-        int    index;
-        char   inches[6];
-        float  decimal;
-        float  steps;
-        char   label[30];
-      }  preSetLookup;
-
     /**********************
     My easy way to write to the Serial debugger screen
  **********************/        
@@ -138,7 +139,7 @@
             will give the number of steps required to move the distance
             passed into the function.   used to convert screen value
             decimals into a number of steps to move the stepper
-      ____________________________________________________________*/    
+      ____________________________________________________________*   
     float  stespFromValue ( float fValue)
       {    
         int  bContinue = 1;
@@ -162,7 +163,7 @@
               }
           }
       }
-
+*/
    /*****************************************************************
            void unPadSpace (char *source)
     
@@ -212,5 +213,35 @@
         return inchValue / distPerStep * (microPerStep / 2 );
       
       }
+    /********************************************************************
+     *    void bounceMotorOffLimit (AccelStepper *motor, int iLimit, int iDirection)
+     *        function used to bounce the motor off the limit switch, instead of writing reversing
+     *        code everywhere, this function will be called
+     *        
+     *              *motor --- which motor is to be moved
+     *              iLimit --- which limit switch is being hit
+     *              iDirection -- which direction should it be moved     
+     * **********************************************************************/
+    void bounceMotorOffLimit (AccelStepper* motor, int iLimit, int iDirection)
+        {
+          int speed_ ;
+          int moveTo_ ; 
+          
+          if (iDirection)   // moving in a + direction
+            {
+              speed_ = maxMotorSpeed * .5;
+              moveTo_ = 1000;
+            }
+          else  
+            {
+              speed_ = -maxMotorSpeed *.5;
+              moveTo_ = -1000;
+            }
+          motor->moveTo (motor->currentPosition() + moveTo_ );
+          motor->setSpeed (speed_);
+          while (digitalRead(iLimit))
+            motor->runSpeed();
+        }
+
     
  
