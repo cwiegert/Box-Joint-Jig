@@ -1061,7 +1061,7 @@
       bNextCut.attachPush(bNextCutPushCallback, &bNextCut);
       bStartAuto.attachPush(bStartAutoPushCallback, &bStartAuto);
       btInvert.attachPop(btInvertPopCallback, &btInvert);
-      btJoy.attachPush(btJoyPushCallback, &btJoy);     
+      //btJoy.attachPush(btJoyPushCallback, &btJoy);     
     /*-----------------------------------------------------*/
       pinMode (sledEnablePin, OUTPUT);
       pinMode (sledStepPin, OUTPUT);
