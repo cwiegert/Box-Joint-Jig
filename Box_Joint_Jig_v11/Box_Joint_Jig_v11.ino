@@ -12,7 +12,11 @@
 
      
   NEW VERSION - Cory Wiegert   08/29/2021
+<<<<<<< HEAD
     v 1.1           First version of the software avaialbe in the public Git.  
+=======
+    v         Don't know how I am going to write the code yet - but let's get started
+>>>>>>> parent of c163956 (version 2  - production testing)
 
 ****************************************************************************************************************************************/
 #include <AccelStepper.h>
@@ -1061,7 +1065,11 @@
       bNextCut.attachPush(bNextCutPushCallback, &bNextCut);
       bStartAuto.attachPush(bStartAutoPushCallback, &bStartAuto);
       btInvert.attachPop(btInvertPopCallback, &btInvert);
+<<<<<<< HEAD
       //btJoy.attachPush(btJoyPushCallback, &btJoy);     
+=======
+      btJoy.attachPush(btJoyPushCallback, &btJoy);     
+>>>>>>> parent of c163956 (version 2  - production testing)
     /*-----------------------------------------------------*/
       pinMode (sledEnablePin, OUTPUT);
       pinMode (sledStepPin, OUTPUT);
@@ -1163,4 +1171,8 @@
       digitalWrite (sledEnablePin, HIGH);
     }
   
+<<<<<<< HEAD
     
+=======
+    
+>>>>>>> parent of c163956 (version 2  - production testing)

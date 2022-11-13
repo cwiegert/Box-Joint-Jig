@@ -5,6 +5,7 @@
   NexButton   bSledLimits =    NexButton      (0, 4, "bSledLim");         //   button to home and set the ball screw limits for the sled
   NexButton   bCarrLimits  =   NexButton      (0, 3, "bCarLim");          //  button to set the carriage end stop limits
   NexDSButton btOnOff     =    NexDSButton    (0, 34, "btOnOff");
+  NexDSButton btJoy     =      NexDSButton    (0, 39, "btJoy");
   NexButton   bZeroSaw  =      NexButton      (0, 29, "bZeroSaw");        //  button used to set the 0 edge of the saw and reset bottom left limit
   NexText     tKerf   =        NexText        (0, 11, "tKerf");           //  text field holding the width of the saw kerf  RESET THE # OFF THE NEXTION
   NexText     tFinger  =       NexText        (0, 10, "tFinger");         //  text field holding the width to cut each finger  REST THE # OFF TEH NEXTION
@@ -17,12 +18,6 @@
   NexText     tCurPos  =       NexText        (0, 33, "tCurPos");         //  text value to display where the saw is during cuts
   NexProgressBar  jProgress=   NexProgressBar (0, 2, "jProgress");        //  keep track of the job, and progress to the end 
   NexDSButton btInvert    =    NexDSButton    (0, 21, "btInvert");        //  button to set whether to cut tounge or groove first
-  NexButton   bSledStop   =    NexButton      (0, 43, "bSledStop");       //  Button to set the slide position stop point to not have to cycle all the way to front limit
-  NexText     tSawStop     =   NexText        (0, 44, "tSawStop");        //  Field to hold the value of the saw stop position from Sled Stop button
-  NexButton   bLeft        =   NexButton      (0, 42, "bLeft");           //  Button to move carriage to the left (like a joystick jog)
-  NexButton   bUp          =   NexButton      (0, 39, "bUp");             //  Button to move the sled forward, similar to joystick move
-  NexButton   bRight       =   NexButton      (0, 41, "bRight");          //  Button to move the carriage to the right
-  NexButton   bDown        =   NexButton      (0, 40, "bDown");           //  Button to move sled to the back, like a joystick jog
   NexPage     Settings =       NexPage        (2,0,"Settings");
   NexNumber   nRightLimit =    NexNumber      (2, 2, "nRightLimit");      //  PIN defined for the right end limit switch on carriage
   NexButton   bHome =          NexButton      (2, 1, "bHome");
@@ -65,11 +60,7 @@
   &bStartAuto,
   &btInvert,
   &bClear,
-  &bSledStop,
-  &bLeft,
-  &bRight,
-  &bUp,
-  &bDown,
+  &btJoy,
   NULL
 }; 
  
