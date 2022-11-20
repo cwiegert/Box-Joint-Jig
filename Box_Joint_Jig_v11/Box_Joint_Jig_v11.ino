@@ -29,6 +29,7 @@
                         -- added function for bumping off the limit switches
                         -- averaged out the reading of the X & Y joystick signals (A1,A2)
                         -- READY FOR LIVE TEST
+  11/19/2022    CDW     -- LIVE and merge back into main line in git.   it's in production
 
 ****************************************************************************************************************************************/
 /* Comment the BLYNK_PRINT if you are not in debug mode*/
@@ -340,7 +341,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
           sprintf(tString, "Home.nRighLim.pco=%ld\0", setColor);
           nexSerial.write(tString);
           FlushBuffer();
-          displaySawPosition (sCarriage.currentPosition(),1);
+          displaySawPosition (sCarriage.currentPosition(),1, 0);
           memset (tString, '\0', sizeof(tString));
           EEPROM.get(BACK_SLED, eeVal);
           sprintf(tString, "Home.nSledBkLim.val=%ld\0", eeVal);
@@ -423,6 +424,10 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
            used to read the kerf, finger width and stock width from the screen
            and set the global variables which calculate the steps from the
            inch values entered in the screen   (finished coding for now ==> 9/13/2021)
+          11_13_2022 -- may need a small adustment to the finger steps to loosen up the joint
+              today - they are tight tight tight.. where the tounges and grooves are exact.
+              will try changing the finger steps by just a small bit, which will shrink the toungs and 
+              open the grooves.   will try 10 steps, no move.    Set as GLOBAL VARIABLE   jointAdjust;
      ************************************************************/
     void bSetParamsPushCallback (void *ptr)
     {
@@ -491,20 +496,18 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
             right limit is set to the right limit - current position
             finished coding CDW  9/12/2021
      ************************************************************/
-    void bZeroSawPopCallback(void *ptr)
+    void bZeroPushCallback(void *ptr)
     {
-      long  lNewZero;
     
       if (!bStop)
       {
-        setLimitFields(1);   
-        lNewZero = zeroToBlade();     //zero edge of the working pieces to the right side of the blade, then reset the end limits
-        rightLimit = rightLimit- lNewZero;
-        leftLimit = leftLimit - lNewZero;
+        rightLimit = rightLimit- sCarriage.currentPosition();
+        leftLimit = leftLimit - sCarriage.currentPosition();
         EEPROM.put(RIGHT_CAR, rightLimit);
         EEPROM.put(LEFT_CAR ,leftLimit);
         sCarriage.setCurrentPosition (0);
-        setLimitFields(1);
+        displaySawPosition (sCarriage.currentPosition(), 0, 1);
+        setLimitFields();   // by not sending a parameter, the function will default to 0, and just set new limit fields
       }
     }
    
@@ -512,7 +515,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
      *  void  bZeroReturnPushCallback (void *ptr)
      *      button used to return the carriage back to the 0 mark of the blade
      *************************************************/
-    void bZeroReturnPushCallback (void *ptr)
+    void bZeroSawPopCallback (void *ptr)
       {
         if (!bStop)
           {
@@ -523,7 +526,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
               sCarriage.setSpeed(maxMotorSpeed);
             while (sCarriage.currentPosition() != sCarriage.targetPosition())
                 sCarriage.runSpeed();
-            displaySawPosition (sCarriage.currentPosition(),0); 
+            displaySawPosition (sCarriage.currentPosition(),0, 1); 
             whereSaw = RIGHT_EDGE;  
             fingerCounter= 0;
           }
@@ -624,7 +627,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
                       delayMicroseconds(nCutDelay);
                       curRead = nexSerial.read();
                     }
-                  bZeroReturnPushCallback(&bZeroReturn);
+                  bZeroSawPopCallback(&bZeroSaw);
                   jONOff = jTemp;
                 }
             }
@@ -647,7 +650,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
                 }
               if (kerfSteps)
                 if (!nextCut())
-                  bZeroReturnPushCallback(&bZeroReturn);
+                  bZeroSawPopCallback(&bZeroSaw);
             }          
       }
     
@@ -710,7 +713,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
             }
           if (digitalRead(LEFT_LIMIT))
             bounceMotorOffLimit (&sCarriage, LEFT_LIMIT, HIGH);
- 
+          displaySawPosition (sCarriage.currentPosition(), 0, 0);
       }
  
 /************************************************************
@@ -749,7 +752,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
             }
           if (digitalRead(RIGHT_LIMIT))
             bounceMotorOffLimit (&sCarriage, RIGHT_LIMIT, LOW);
-              
+          displaySawPosition (sCarriage.currentPosition(), 0, 0);  
       }
 
 /************************************************************
@@ -807,10 +810,10 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
         if (!bStop)
         {
           
-          sCarriage.moveTo(sCarriage.currentPosition() - 600000); 
+          sCarriage.moveTo(sCarriage.currentPosition() - 200000); 
           sCarriage.setSpeed(-maxMotorSpeed);
           while (!digitalRead(LEFT_LIMIT) && !bStop)
-            sCarriage.run();  
+            sCarriage.runSpeed();  
           if (bStop)
             {
               stopMotor();
@@ -831,11 +834,13 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
             
           // Now run to the other end of the ball screw to set the right limit of the sled
           delayMicroseconds(nCutDelay);
-          sCarriage.moveTo(sCarriage.currentPosition() + 600000);
+          sCarriage.moveTo( 300000);
           sCarriage.setSpeed((maxMotorSpeed));
           //sCarriage.setAcceleration (2000);
           while (!digitalRead(RIGHT_LIMIT) && !bStop)
-            sCarriage.runSpeed();          
+            {
+              sCarriage.runSpeed(); 
+            }      
  
           if (bStop)
           {
@@ -854,7 +859,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
           EEPROM.put(RIGHT_CAR, rightLimit);
           // Move the sled back to the 0 position on the left limit switch
           sCarriage.moveTo(leftLimit - 100);
-          sCarriage.setSpeed ((-maxMotorSpeed));
+          sCarriage.setSpeed ((-maxMotorSpeed *.9));
           while ((!digitalRead(LEFT_LIMIT)) && !bStop)
             sCarriage.runSpeed();  
           if (digitalRead(LEFT_LIMIT))
@@ -879,8 +884,9 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
       btOnOff.getValue(&bStop);
       if (!bStop)
         {
+          
           sSled.moveTo(sSled.currentPosition() + 500000);
-          sSled.setSpeed (maxMotorSpeed);
+          sSled.setSpeed (maxMotorSpeed *.8);
 
           while (!digitalRead(BACK_LIMIT) && !bStop)
             sSled.runSpeed();          
@@ -898,7 +904,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
           sSled.setCurrentPosition (0);
           // Now run to the other end of the ball screw to set the front limit of the sled
           sSled.moveTo(sSled.currentPosition() -300000);
-          sSled.setSpeed (-maxMotorSpeed);
+          sSled.setSpeed (-maxMotorSpeed *.8 );
 
           while (!digitalRead(FRONT_LIMIT) && !bStop)
             sSled.runSpeed();                 //  run sled through saw          
@@ -914,7 +920,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
           EEPROM.put(FRONT_SLED, frontLimit);
           
           sSled.moveTo (backLimit + 50);
-          sSled.setSpeed (maxMotorSpeed);
+          sSled.setSpeed (maxMotorSpeed * .8);
           // Move the sled back to the 0 position on the left limit switch
           while (!digitalRead(BACK_LIMIT))
             sSled.runSpeed();
@@ -955,7 +961,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
                 sSled.moveTo (frontLimit);
               else
                 sSled.moveTo (lSledLimit);
-              sSled.setSpeed(-maxMotorSpeed );
+              sSled.setSpeed(-maxMotorSpeed *.8);
               do                                //  run sled through saw
                 {
                   sSled.runSpeed();
@@ -964,7 +970,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
 
               sSled.moveTo(backLimit);
               delayMicroseconds(nCutDelay);
-              sSled.setSpeed((maxMotorSpeed));
+              sSled.setSpeed((maxMotorSpeed *.8));
               do                               // bring sled back to starting position
                 {
                   sSled.runSpeed();
@@ -986,7 +992,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
     bool   nextCut()
     {  
       bCarrMoved = false;
-       if (sCarriage.currentPosition() >= stockSteps)//   beyond the edge of the stock, don't need to cut anything more
+       if (sCarriage.currentPosition()  >= stockSteps)//   beyond the edge of the stock, don't need to cut anything more
           return LOW;
        switch (whereSaw)
          {
@@ -996,26 +1002,38 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
                   {  
                      if (bInverted)
                       {
+                        // .  Do I want to move KerfSteps + fingerSteps here?
+                        sCarriage.moveTo (sCarriage.currentPosition() +   fingerSteps + (kerfSteps));
+                        sCarriage.setSpeed (maxMotorSpeed);
+                        while (sCarriage.currentPosition() != sCarriage.targetPosition())
+                          sCarriage.runSpeed();
                         whereSaw = LEFT_EDGE;
                         firstCutRightSaw = sCarriage.currentPosition();
+                        movingRightEdge = firstCutRightSaw;
+                        bCarrMoved = true;
+                        fingerCounter++;
                         break;
                       }                        
                      else
                       {
-                        sCarriage.moveTo(fingerSteps);
+                        firstCutRightSaw = sCarriage.currentPosition();
+                        movingRightEdge = firstCutRightSaw;
+                        sCarriage.moveTo(kerfSteps);
                         sCarriage.setSpeed (maxMotorSpeed);
                         while (sCarriage.currentPosition() != sCarriage.targetPosition())
                             sCarriage.runSpeedToPosition();
                         fingerCounter = fingerCounter +1;
                         bCarrMoved = true;
                         whereSaw = LEFT_EDGE;
-                        firstCutRightSaw = sCarriage.currentPosition();
-                        break;
+                        
+ 
+                       break;
                       }
                   }
                 else                                              //May need logic here to but the last little remnant from left side of stock  
                   {
-                    sCarriage.moveTo (zeroPosition + kerfSteps + (fingerCounter*fingerSteps));
+                    sCarriage.moveTo (firstCutRightSaw + kerfSteps + (fingerCounter*fingerSteps));
+
                   }  
                 if (sCarriage.currentPosition() <= stockSteps)            
                     {                
@@ -1023,55 +1041,74 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
                       sCarriage.setSpeed(maxMotorSpeed);
                       while (sCarriage.currentPosition() != sCarriage.targetPosition())
                         sCarriage.runSpeedToPosition();
+                      movingRightEdge = sCarriage.currentPosition();
                       whereSaw = LEFT_EDGE; 
                       bCarrMoved = true;
                     }
-                
-                firstCutRightSaw = sCarriage.currentPosition();
               //  displaySawPosition (sCarriage.currentPosition(), 0);
                 break;
               }
             case LEFT_EDGE:               // cut the outer edge of the finger, set the status to hog out the middle
               {
-                 if (sCarriage.currentPosition() >= stockSteps)//   beyond the edge of the stock, don't need to cut anything more
+                 if (sCarriage.currentPosition() - kerfSteps >= stockSteps)//   beyond the edge of the stock, don't need to cut anything more
                   {
-                    displaySawPosition (sCarriage.currentPosition(), 0);
+                    displaySawPosition (sCarriage.currentPosition(), 0, 1);
                     return LOW;
                   }
-   
-                sCarriage.moveTo ( zeroPosition + (fingerCounter+1) * fingerSteps));
+                if (fingerCounter == 1)
+                  if (!bInverted)
+                    sCarriage.moveTo ( firstCutRightSaw + (fingerCounter  * fingerSteps) + jointAdjust);
+                  else
+                    sCarriage.moveTo ((firstCutRightSaw - kerfSteps) + (fingerCounter  * fingerSteps) + jointAdjust);
+                else
+                  sCarriage.moveTo ( firstCutRightSaw + (fingerCounter +1) * fingerSteps + jointAdjust);
+
                 sCarriage.setSpeed(maxMotorSpeed);
-                while (sCarriage.currentPosition() != sCarriage.targetPosition())
-                  sCarriage.runSpeed();
-                if (sCarriage.currentPosition() == sCarriage.targetPosition())
+                while (sCarriage.currentPosition() != sCarriage.targetPosition() && !digitalRead(RIGHT_LIMIT))
                   {
-                    bCarrMoved = True;
-                    whereSaw = HOG_OUT;
-                    break;
+       //             writeDebug ("current Position==> " + String(sCarriage.currentPosition()) + " targetPosition ==> " + String (sCarriage.targetPosition()), 1);
+                    sCarriage.runSpeed();
                   }
+                displaySawPosition (sCarriage.currentPosition(), 0, 1);
+                bCarrMoved = true;
+                whereSaw = HOG_OUT;
+               break;
+                
               }
             case HOG_OUT:         // check to see if we are goign to go past the end of the right edge, if not, start hogging
                                   //   if so, move the blade to just past the start of the kerf on the right edge and finish hogging
-              {
-                if (sCarriage.currentPosition() - (.75 * kerfSteps) > firstCutRightSaw)
+              {                  
+                if (sCarriage.currentPosition() - (.85 * kerfSteps) > movingRightEdge)
                   {
-                    sCarriage.moveTo (sCarriage.currentPosition() - (.875 * kerfSteps));
-                    sCarriage.setSpeed(maxMotorSpeed);
+                    sCarriage.moveTo (sCarriage.currentPosition() - (.75 * kerfSteps));
+                    sCarriage.setSpeed(-maxMotorSpeed );
+                   // sCarriage.runSpeedToPosition();
                     while (sCarriage.currentPosition() != sCarriage.targetPosition())
                       sCarriage.runSpeed();
                     bCarrMoved = true;
                     break;
                   }
-                if (sCarriage.currentPosition() - (.75 * kerfSteps) < firstCutRightSaw)
+                if (bInverted && fingerCounter == 1)
+                  movingRightEdge += kerfSteps;  
+                if (sCarriage.currentPosition() - (.75 * kerfSteps) < movingRightEdge)
                   {
                     whereSaw = RIGHT_EDGE;
                     bCarrMoved = false;
-                    fingerCounter = fingerCounter + 2;
+                    if (bInverted && fingerCounter == 1)
+                      {
+                        movingRightEdge = movingRightEdge - (2 * kerfSteps);
+                        firstCutRightSaw = movingRightEdge;
+                      }
+                    //fingerCounter = fingerCounter + 2;
+                    if (fingerCounter == 1)
+                      fingerCounter +=1;
+                    else
+                      fingerCounter +=2 ;
                     break;
                   }
               }  
          }
-       displaySawPosition (sCarriage.currentPosition(), 0);
+       displaySawPosition (sCarriage.currentPosition(), 0, 1);
        return HIGH;                 
      }
 
@@ -1080,7 +1117,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
      *        setting the display on the UI for the current saw position 
      *        will set it in steps
      ************************************************/
-    void  displaySawPosition(long sawPos, int howTo)
+    void  displaySawPosition(long sawPos, int howTo, int progBar)
        {
           char  sCommand[40] = {'\0'};
           char  s[9] = {'\0'};
@@ -1093,14 +1130,17 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
           nexSerial.write(sCommand);
               
           FlushBuffer();
-          memset(sCommand, '\0', sizeof(sCommand));
-          float  val = calcInches(sawPos)/calcInches(stockSteps);
-          if (int(val*100) < 100)
-            sprintf(sCommand, "jProgress.val=%d", int(val*100));
-          else
-            sprintf(sCommand, "jProgress.val=100");
-          nexSerial.write(sCommand);
-          FlushBuffer();
+         if (progBar) 
+          {
+            memset(sCommand, '\0', sizeof(sCommand));
+            float  val = calcInches(sawPos)/calcInches(stockSteps);
+            if (int(val*100) < 100)
+              sprintf(sCommand, "jProgress.val=%d", int(val*100));
+            else
+              sprintf(sCommand, "jProgress.val=100");
+            nexSerial.write(sCommand);
+            FlushBuffer();
+          }
        }
 
    /***************************************************************
@@ -1244,7 +1284,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
       DEBUG = HIGH;
       if (DEBUG)
         {
-          Serial.begin (500000);
+          Serial.begin (1000000);
           delay(500);
         }
 
@@ -1263,7 +1303,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
       btOnOff.attachPush(btOnOffPushCallback, &btOnOff);
       bSetParams.attachPush (bSetParamsPushCallback, &bSetParams);
       bClear.attachPop (bClearPopCallback, &bClear);
-      bZeroReturn.attachPush(bZeroReturnPushCallback, &bZeroReturn);
+      bZero.attachPush(bZeroPushCallback, &bZero);
       bNextCut.attachPush(bNextCutPushCallback, &bNextCut);
       bStartAuto.attachPush(bStartAutoPushCallback, &bStartAuto);
       btInvert.attachPop(btInvertPopCallback, &btInvert);
@@ -1296,19 +1336,14 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
       
     /*-----------------------------------------------------*/  
       sSled.setAcceleration (maxAcceleration);
-        
-writeDebug ("maxMotorSpeed ==> " + String(maxMotorSpeed), 1);
-     // sSled.setMaxSpeed(maxMotorSpeed);
-     sSled.setMaxSpeed(32000);
+      sSled.setMaxSpeed(maxMotorSpeed);
       sSled.setMinPulseWidth(pulseWidthMicros);
-writeDebug ("maxMotorSpeed ==> " + String(sSled.maxSpeed()), 1);
     /*-----------------------------------------------------*/
       sCarriage.setMinPulseWidth(pulseWidthMicros);
-     // sCarriage.setMaxSpeed(maxMotorSpeed);
-     sCarriage.setMaxSpeed(32000);
-      //sCarriage.setAcceleration(maxAcceleration);
-      sCarriage.setAcceleration(4000);
-    /*-----------------------------------------------------*/  
+      sCarriage.setMaxSpeed(maxMotorSpeed);
+      sCarriage.setAcceleration(maxAcceleration);
+      sCarriage.setCurrentPosition (0);
+      /*-----------------------------------------------------*/  
 
       stopMotor();
       bStop = HIGH;

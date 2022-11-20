@@ -76,6 +76,7 @@
     float   totFingers;                   //  number of fingers to cut in the stock
     float   stockWidth;                   //  width of the wood stock being cut
     float   firstCutRightSaw;             //  step position of the first cut of a finger;   Used to assess when done hogging flot
+    float   movingRightEdge;
     float   zeroPosition;                 //  right edge of stock, used to calculate positioning carraige against blade
     int    whereSaw;                     //  where in the cut process are we?   valid values:  RIGHT_EDGE, LEFT_EDGE, HOG_OUT
     boolean bCarrMoved;                   //  flag to test whether to cycle the sled.   Initialized in NextCut();
@@ -104,6 +105,7 @@
     byte    jONOff = HIGH;               // joystick power setting   LOW = off, HIGH = on
     int     xAxisLock = 1;
     int     yAxisLock = 1;
+    int     jointAdjust = 70;           // variable to add play to the finger joints, this will get applied to fingerSteps variable, but only in the LEFT_EDGE section
 
     
     /**********************
@@ -130,7 +132,7 @@
      *************************************************/
     float calcInches (float numOfSteps)
       {
-        return numOfSteps / (microPerStep / 2 ) * distPerStep;
+        return numOfSteps / microPerStep * distPerStep; // removed the divide by 1 from microstep 11_13_22
       }
    
     /********************************************************
@@ -210,7 +212,7 @@
     ***************************************************/
     float calcSteps (float inchValue) 
       {
-        return inchValue / distPerStep * (microPerStep / 2 );
+        return inchValue / distPerStep * (microPerStep );  //11_13_2022 removed the divided by 2
       
       }
     /********************************************************************

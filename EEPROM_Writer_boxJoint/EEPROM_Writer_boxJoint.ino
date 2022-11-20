@@ -40,7 +40,7 @@
         uint8_t    enablePin = 35;                 //  pin that will wire to the E+ on the stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
         uint8_t    sledEnablePin = 39;            //  pin that will wire to the E+ on the fence stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
         int     initSpeed = 4000;              //  sets the initial speed of the motor.   Don't think we need acceleration in the router, but will find out
-        long    maxMotorSpeed = 50000;         //  as defined - maximum speed motor will run.   Sets the 100% on the speed slider
+        long    maxMotorSpeed = 22000;         //  as defined - maximum speed motor will run.   Sets the 100% on the speed slider
         int     maxAcceleration = 2000;        //  maximum number of steps for acceleration
         long    workingMotorSpeed = 4000;      //  active working speed, set by the slider, and will be somewhere between 0 and 100%
         int     stepsPerRevolution = 1600;     //  number of steps required for 1 revolution of leadscrew
@@ -188,7 +188,7 @@ int loadHeightsFromFile(int move_go) {
 
 void setup() 
   {
-    Serial.begin(500000);
+    Serial.begin(1000000);
       delay (1000);
    pinMode(SD_WRITE, OUTPUT);       // define the SD card writing pin
         
