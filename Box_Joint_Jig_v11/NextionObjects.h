@@ -13,7 +13,7 @@
   NexButton   bSetParams =     NexButton      (0, 31, "bSetParams");
   NexButton   bClear =         NexButton      (0, 35, "bClear");          //  button to clear the parameter fields.   values set in Nextion UI IDE
   NexButton   bStartAuto  =    NexButton      (0, 27, "bStartAuto");      //  button for starting the automatic sled, carriage model
-  NexButton   bZeroReturn  =   NexButton      (0, 32, "bZero");           //  return carriage back to the 0 edge of the blade after completing cuts
+  NexButton   bZero        =   NexButton      (0, 32, "bZero");           //  return carriage back to the 0 edge of the blade after completing cuts
   NexButton   bNextCut  =      NexButton      (0, 28, "bNextCut");        //  Nextion screen button to move to next cut
   NexText     tCurPos  =       NexText        (0, 33, "tCurPos");         //  text value to display where the saw is during cuts
   NexProgressBar  jProgress=   NexProgressBar (0, 2, "jProgress");        //  keep track of the job, and progress to the end 
@@ -55,7 +55,7 @@
   &btOnOff,
   &bZeroSaw,
   &bSetParams,
-  &bZeroReturn,
+  &bZero,
   &bNextCut,
   &bStartAuto,
   &btInvert,
