@@ -1358,7 +1358,7 @@ int boardMemory = 4098;   // 4K of memory for the Mega board
       EspSerial.begin(115200);      // Start the wifi shield and connect to local wifi
       delay(20);
       //Blynk.begin(BLYNK_AUTH_TOKEN, wifi, "Everest 2.4G", "************");
-      Blynk.begin(BLYNK_AUTH_TOKEN, wifi, "Everest", "67NorseSk!");
+      Blynk.begin(BLYNK_AUTH_TOKEN, wifi, "Everest", "*********");
       Blynk.virtualWrite(V6, xAxisLock);
       Blynk.virtualWrite(V7, yAxisLock);
       Blynk.virtualWrite(V9, jONOff);
