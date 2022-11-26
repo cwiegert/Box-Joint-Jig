@@ -1,6 +1,6 @@
-#define BLYNK_TEMPLATE_ID "TMPLCMSbrrOs"
-#define BLYNK_DEVICE_NAME "Box Joint Jig"
-#define BLYNK_AUTH_TOKEN "1l5eObE7e-_gO4IdX3W7cqEIBBLfbFqU"
+//#define BLYNK_TEMPLATE_ID "TMPLCMSbrrOs"
+//#define BLYNK_DEVICE_NAME "Box Joint Jig"
+//#define BLYNK_AUTH_TOKEN "1l5eObE7e-_gO4IdX3W7cqEIBBLfbFqU"
 
 /*********************************************************************
     This code is for a project to automate a Box Joint jig on a tablesaw.   The jig will have a sled to move the wood tenons on the x axis to
