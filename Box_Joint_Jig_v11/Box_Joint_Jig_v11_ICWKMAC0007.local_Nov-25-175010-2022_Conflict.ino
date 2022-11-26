@@ -16,7 +16,7 @@
 
      
   NEW VERSION - Cory Wiegert   08/29/2021
-    
+    v         Don't know how I am going to write the code yet - but let's get started
 
     11/12/2022  v. 2.0  -- Added the wifi shield and BLYNK app to have a joystick from a smartphone.   A
                         -- Added logic in the RIGHT_EDGE section of nextCut(), as I don't think there was a move
@@ -30,8 +30,6 @@
                         -- averaged out the reading of the X & Y joystick signals (A1,A2)
                         -- READY FOR LIVE TEST
   11/19/2022    CDW     -- LIVE and merge back into main line in git.   it's in production
-  11/25/2022    CDW     -- Needed to adjust the left edge logic, had to hog out last cut 
-                        -- disabled the WIFI, no longer needed as Joystick with the accelstepper was just too slow
 
 ****************************************************************************************************************************************/
 /* Comment the BLYNK_PRINT if you are not in debug mode*/
@@ -39,8 +37,8 @@
 //#define BLYNK_DEBUG 
 #include <AccelStepper.h>
 #include "NextionObjects.h"
-//#include <ESP8266_Lib.h>
-//#include <BlynkSimpleShieldEsp8266.h>
+#include <ESP8266_Lib.h>
+#include <BlynkSimpleShieldEsp8266.h>
 #include <EEPROM.h>
 #include "GlobalVars.h"
 
@@ -59,20 +57,18 @@
   AccelStepper  sSled (AccelStepper::FULL2WIRE, sledStepPin, sledDirPin, HIGH);
   AccelStepper  sCarriage (AccelStepper::FULL2WIRE, stepPin, directionPin, HIGH);
 
-  int boardMemory = 4098;   // 4K of memory for the Mega board
-
 /***********************************************
      if Blynk capabilities are to be added to the boxjoint program
      the 3 lines below have to be uncommented, and the ESP / blynk include libraries
      need to be uncommented above.
  ********************************************/
 /*Hardware Serial on Mega, Leonardo, Micro...*/
-//#define EspSerial Serial1
-//ESP8266     wifi(&EspSerial);
-//BlynkTimer  timer;
+#define EspSerial Serial1
+ESP8266     wifi(&EspSerial);
+BlynkTimer  timer;
 
 
-
+int boardMemory = 4098;   // 4K of memory for the Mega board
 
     /******************************************************
       void  getSettingsScreen(char *verString)
@@ -1063,21 +1059,25 @@
               }
             case LEFT_EDGE:               // cut the outer edge of the finger, set the status to hog out the middle
               {
-                 if (sCarriage.currentPosition() - kerfSteps >= stockSteps)  //   set the final cut to the edge of the stock
-                  sCarriage.moveTo (stockSteps);          //11_25_2022 - needed to adjust to hog out last section
-
+                 if (sCarriage.currentPosition() - kerfSteps >= stockSteps)//   beyond the edge of the stock, don't need to cut anything more
+                  {
+                    displaySawPosition (sCarriage.currentPosition(), 0, 1);
+                    return LOW;
+                  }
                 if (fingerCounter == 1)
                   if (!bInverted)
                     sCarriage.moveTo ( firstCutRightSaw + (fingerCounter  * fingerSteps) + jointAdjust);
                   else
                     sCarriage.moveTo ((firstCutRightSaw - kerfSteps) + (fingerCounter  * fingerSteps) + jointAdjust);
-                else if (sCarriage.currentPosition () != stockSteps)
+                else
                   sCarriage.moveTo ( firstCutRightSaw + (fingerCounter +1) * fingerSteps + jointAdjust);
 
                 sCarriage.setSpeed(maxMotorSpeed);
                 while (sCarriage.currentPosition() != sCarriage.targetPosition() && !digitalRead(RIGHT_LIMIT))
-                  sCarriage.runSpeed();
- 
+                  {
+       //             writeDebug ("current Position==> " + String(sCarriage.currentPosition()) + " targetPosition ==> " + String (sCarriage.targetPosition()), 1);
+                    sCarriage.runSpeed();
+                  }
                 displaySawPosition (sCarriage.currentPosition(), 0, 1);
                 bCarrMoved = true;
                 whereSaw = HOG_OUT;
@@ -1086,11 +1086,13 @@
               }
             case HOG_OUT:         // check to see if we are goign to go past the end of the right edge, if not, start hogging
                                   //   if so, move the blade to just past the start of the kerf on the right edge and finish hogging
-              {                       
+              {                  
+     
                 if (sCarriage.currentPosition() - (.75 * kerfSteps) > movingRightEdge)
                   {
                     sCarriage.moveTo (sCarriage.currentPosition() - (.75 * kerfSteps));
                     sCarriage.setSpeed(-maxMotorSpeed );
+                   // sCarriage.runSpeedToPosition();
                     while (sCarriage.currentPosition() != sCarriage.targetPosition())
                       sCarriage.runSpeed();
                     bCarrMoved = true;
@@ -1107,6 +1109,7 @@
                         movingRightEdge = movingRightEdge - (2 * kerfSteps);
                         firstCutRightSaw = movingRightEdge;
                       }
+                    //fingerCounter = fingerCounter + 2;
                     if (fingerCounter == 1)
                       fingerCounter +=1;
                     else
@@ -1190,8 +1193,8 @@
       digitalWrite (enablePin, LOW);
       digitalWrite (sledEnablePin, LOW);  
     }
-  //11_25_2022 -- commented all BLYNK event handlers.. joystick too slow  
- /*   BLYNK_WRITE(V10)      // Joystick input
+    
+    BLYNK_WRITE(V10)      // Joystick input
   { 
     int xAxis = param[0].asInt();
     int yAxis = param[1].asInt(); 
@@ -1249,7 +1252,7 @@
       {
         jONOff = param.asInt();
       }
-  */
+  
   /**************************************************************
      *   void moveMotor (AccelStepper *, int)
      *      used as a single functiont to move either motor.  Using the pointer
@@ -1362,15 +1365,14 @@
       
      // setJoyAverage();              // adjust for jitter in the analog reading.   Set the average voltage
     
-    //  11_25_2022 --- disabled all BLYNK controls
-     /* EspSerial.begin(115200);      // Start the wifi shield and connect to local wifi
+      EspSerial.begin(115200);      // Start the wifi shield and connect to local wifi
       delay(20);
       //Blynk.begin(BLYNK_AUTH_TOKEN, wifi, "Everest 2.4G", "************");
-     // Blynk.begin(BLYNK_AUTH_TOKEN, wifi, "Everest", "********");
-      Blynk.virtualWrite(V6, xAxisLock);
-      Blynk.virtualWrite(V7, yAxisLock);
-      Blynk.virtualWrite(V9, jONOff);
-      Blynk.syncAll(); */ 
+     // Blynk.begin(BLYNK_AUTH_TOKEN, wifi, "Everest", "67NorseSk!");
+      //Blynk.virtualWrite(V6, xAxisLock);
+      //Blynk.virtualWrite(V7, yAxisLock);
+      //Blynk.virtualWrite(V9, jONOff);
+      //Blynk.syncAll(); 
       tSawStop.setText ("--READY--");
       FlushBuffer();
       
@@ -1379,7 +1381,8 @@
  // RUN THE LOOP  
     void loop() 
       {
-       int x = 0;//   jONOff = HIGH;
+       int x = 0;
+  //   jONOff = HIGH;
           
      // if (jONOff)                         // if the Joystick is enabled, move sled or carriage
      //   {
