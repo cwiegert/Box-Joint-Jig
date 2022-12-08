@@ -33,8 +33,6 @@
     const PROGMEM uint8_t    sledEnablePin = 39;            //  pin that will wire to the E+ on the fence stepper controller.   Turns the controller on and off  LOW turns motor on, HIGH turns motor off
     const PROGMEM int        SD_WRITE = 53;                      //  CS pin of the SD card
     const PROGMEM int        nCutDelay = 200;                   //  microseconds between sled cycles.   Pauses the autocut for a tiny bit so we aren't hammering the motor
-    const PROGMEM int        xPin = A2;
-    const PROGMEM int        yPin = A1;
     
     /*_______________________________________________________________________________________________________________*/
         
@@ -82,7 +80,6 @@
     boolean bCarrMoved;                   //  flag to test whether to cycle the sled.   Initialized in NextCut();
     int     currFinger;                   //  current finger that is being cut
     int     fingerCounter = 0;            //  counter for comparing to currFinger
-    int    moveCarriage = 22;            //  mechanical button to manually tell carriage to move to next cut    
     uint32_t     bInverted = 0;
     char    errorTxt[200] = {'\0'};
     
@@ -97,14 +94,6 @@
     uint32_t    bStop = 0;                //  used as a flag to test if the stop button has been pressed.
     int     eeAddress;
     int     DEBUG = 1;
-    byte    jPin;
-    int     xVal;
-    int     yVal;
-    int     aveRead_x;
-    int     aveRead_y;
-    byte    jONOff = HIGH;               // joystick power setting   LOW = off, HIGH = on
-    int     xAxisLock = 1;
-    int     yAxisLock = 1;
     int     jointAdjust = 70;           // variable to add play to the finger joints, this will get applied to fingerSteps variable, but only in the LEFT_EDGE section
 
     
@@ -180,7 +169,7 @@
         char  sRemove[80] = {'\0'};
         int   i = 0;
         int   r = 0;
-        int   iLeng = 0;
+
 
         while ( source[i] != '\0')
         {

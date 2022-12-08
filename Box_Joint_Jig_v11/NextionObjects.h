@@ -4,7 +4,7 @@
   NexButton   bSetScrn =       NexButton      (0, 1, "bSetScrn");
   NexButton   bSledLimits =    NexButton      (0, 4, "bSledLim");         //   button to home and set the ball screw limits for the sled
   NexButton   bCarrLimits  =   NexButton      (0, 3, "bCarLim");          //  button to set the carriage end stop limits
-  NexDSButton btOnOff     =    NexDSButton    (0, 34, "btOnOff");
+  NexDSButton btOnOff     =    NexDSButton    (0, 34, "Home.btOnOff");
   NexButton   bZeroSaw  =      NexButton      (0, 29, "bZeroSaw");        //  button used to set the 0 edge of the saw and reset bottom left limit
   NexText     tKerf   =        NexText        (0, 11, "tKerf");           //  text field holding the width of the saw kerf  RESET THE # OFF THE NEXTION
   NexText     tFinger  =       NexText        (0, 10, "tFinger");         //  text field holding the width to cut each finger  REST THE # OFF TEH NEXTION

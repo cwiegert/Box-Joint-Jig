@@ -1,6 +1,6 @@
-//#define BLYNK_TEMPLATE_ID "TMPLCMSbrrOs"
-//#define BLYNK_DEVICE_NAME "Box Joint Jig"
-//#define BLYNK_AUTH_TOKEN "1l5eObE7e-_gO4IdX3W7cqEIBBLfbFqU"
+#define BLYNK_TEMPLATE_ID "TMPLCMSbrrOs"
+#define BLYNK_DEVICE_NAME "Box Joint Jig"
+#define BLYNK_AUTH_TOKEN "1l5eObE7e-_gO4IdX3W7cqEIBBLfbFqU"
 
 /*********************************************************************
     This code is for a project to automate a Box Joint jig on a tablesaw.   The jig will have a sled to move the wood tenons on the x axis to
@@ -37,10 +37,11 @@
 /* Comment the BLYNK_PRINT if you are not in debug mode*/
 #define BLYNK_PRINT Serial
 //#define BLYNK_DEBUG 
-#include <AccelStepper.h>
-#include "NextionObjects.h"
 //#include <ESP8266_Lib.h>
 //#include <BlynkSimpleShieldEsp8266.h>
+
+#include <AccelStepper.h>
+#include "NextionObjects.h"
 #include <EEPROM.h>
 #include "GlobalVars.h"
 
@@ -71,9 +72,6 @@
 //ESP8266     wifi(&EspSerial);
 //BlynkTimer  timer;
 
-
-
-
     /******************************************************
       void  getSettingsScreen(char *verString)
           Function to load all the settings fro the pins and files.   be very careful with this section
@@ -83,65 +81,80 @@
     void   putSettingsScreen( )
     {
       char    tempWriter[60] = {'\0'};
-      float   limTemp;
-      int     i = 0;
       char    tempBuff[15] = {'\0'};
     
       memset(tempWriter, '\0', sizeof(tempWriter));
-      sprintf(tempWriter, "Settings.nLeftLimit.val=%d\0", LEFT_LIMIT);
+      sprintf(tempWriter, "Settings.nLeftLimit.val=%d", LEFT_LIMIT);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nRightLimit.val=%d\0", RIGHT_LIMIT);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nRightLimit.val=%d", RIGHT_LIMIT);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nFrontLimit.val=%d\0", FRONT_LIMIT);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nFrontLimit.val=%d", FRONT_LIMIT);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nBackLimit.val=%d\0", BACK_LIMIT);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nBackLimit.val=%d", BACK_LIMIT);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nDirectionPin.val=%d\0", directionPin);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nDirectionPin.val=%d", directionPin);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nSledDirPin.val=%d\0", sledDirPin);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nSledDirPin.val=%d", sledDirPin);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nStepPin.val=%d\0", stepPin);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nStepPin.val=%d", stepPin);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nSledStepPin.val=%d\0", sledStepPin);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nSledStepPin.val=%d", sledStepPin);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nEnablePin.val=%d\0", enablePin);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nEnablePin.val=%d", enablePin);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nSledEblPin.val=%d\0", sledEnablePin);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nSledEblPin.val=%d", sledEnablePin);
       nexSerial.write(tempWriter);
       FlushBuffer();
+      memset(tempWriter, '\0', sizeof(tempWriter));
       sprintf(tempWriter, "Settings.nPlseWdtMicro.val=%d", pulseWidthMicros);
       nexSerial.write(tempWriter);
       FlushBuffer();
+      memset(tempWriter, '\0', sizeof(tempWriter));
       dtostrf(maxMotorSpeed, 5, 0, tempBuff);
-      sprintf(tempWriter, "Settings.tMaxMotorSpeed.txt=\"%s\"\0", tempBuff);
+      sprintf(tempWriter, "Settings.tMaxMotorSpeed.txt=\"%s\"", tempBuff);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nMaxAccel.val=%d\0", maxAcceleration);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nMaxAccel.val=%d", maxAcceleration);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nWorkMtrSpd.val=%d\0", workingMotorSpeed);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nWorkMtrSpd.val=%ld", workingMotorSpeed);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nSDWrite.val=%d\0", SD_WRITE);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nSDWrite.val=%d", SD_WRITE);
       nexSerial.write(tempWriter);
       FlushBuffer();
       strcpy(tempBuff, "");
       dtostrf(distPerStep, 1, 8, tempBuff);
-      sprintf(tempWriter, "Settings.tDistPerStep.txt=\"%s\"\0", tempBuff);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.tDistPerStep.txt=\"%s\"", tempBuff);
       nexSerial.write(tempWriter);
       FlushBuffer();
-      sprintf(tempWriter, "Settings.nMilisBtwn.val=%d\0", millisBetweenSteps);
+      memset(tempWriter, '\0', sizeof(tempWriter));
+      sprintf(tempWriter, "Settings.nMilisBtwn.val=%d", millisBetweenSteps);
       nexSerial.write(tempWriter);
       FlushBuffer();
+      memset(tempWriter, '\0', sizeof(tempWriter));
       dtostrf(initSpeed, 5, 0, tempBuff);
       if (DEBUG)
         Serial.println(tempBuff);
@@ -149,6 +162,7 @@
       sprintf(tempWriter, "Settings.tInitSpeed.txt=\"%s\"", tempBuff);
       nexSerial.write(tempWriter);
       FlushBuffer();
+      memset(tempWriter, '\0', sizeof(tempWriter));
       sprintf(tempWriter, "Settings.nStpsPerRev.val=%d", stepsPerRevolution);
       nexSerial.write(tempWriter);
       FlushBuffer();
@@ -212,8 +226,6 @@
         eeAddress += sizeof(maxMotorSpeed);
         EEPROM.get(eeAddress, workingMotorSpeed);
         eeAddress += sizeof(workingMotorSpeed);
-        EEPROM.get(eeAddress, jPin);
-        eeAddress += sizeof(jPin);
         
         if ( DEBUG)
         {
@@ -259,8 +271,6 @@
           Serial.println(maxMotorSpeed);
           Serial.print(F("workingMotorSpeed ==> "));
           Serial.println(workingMotorSpeed);
-          Serial.print(F("Joystick Power Pin ==> "));
-          Serial.println(jPin);             
         }
     
       }
@@ -286,7 +296,7 @@
      *      is refreshed.   The fields will not reset automatically, as they are not
      *      stored anywhere except the temperal UI while it is active
      * *******************************************************/
-    byte setLimitFields (int whereFrom = 0)
+    void setLimitFields (int whereFrom = 0)
       {
         char  tString[80];
         long  setColor = 2016;
@@ -298,14 +308,15 @@
             case 1:         //  Carriage limits values to be cleared and color's changed
               {
                 memset(tString, '\0', sizeof(tString));
-                sprintf(tString, "Home.nLeftLim.pco=%ld\0", notSetColor);
+                sprintf(tString, "Home.nLeftLim.pco=%ld", notSetColor);
                 nexSerial.write(tString);
                 FlushBuffer();
                 memset(tString, '\0', sizeof(tString));
-                sprintf(tString, "Home.nRighLim.pco=%ld\0", notSetColor);
+                sprintf(tString, "Home.nRighLim.pco=%ld", notSetColor);
                 nexSerial.write(tString);
                 FlushBuffer();
-                sprintf(tString, "Home.RighLIm.val=0\0");
+                memset(tString, '\0', sizeof(tString));
+                sprintf(tString, "Home.RighLIm.val=0");
                 nexSerial.write(tString);
                 FlushBuffer();
                 break;
@@ -313,11 +324,11 @@
             case 2:         //  Sled limits values to be cleared and color change
               {
                 memset(tString, '\0', sizeof(tString));
-                sprintf(tString, "Home.nSledBkLim.pco=%ld\0", notSetColor);
+                sprintf(tString, "Home.nSledBkLim.pco=%ld", notSetColor);
                 nexSerial.write(tString);
                 FlushBuffer();
                 memset(tString, '\0', sizeof(tString));
-                sprintf(tString, "Home.nSledFrntLmt.pco=%ld\0", notSetColor);
+                sprintf(tString, "Home.nSledFrntLmt.pco=%ld", notSetColor);
                 nexSerial.write(tString);
                 FlushBuffer();
                 break;
@@ -338,17 +349,17 @@
           leftLimit = eeVal;
           FlushBuffer();
           memset(tString, '\0', sizeof(tString));
-          sprintf(tString, "Home.nLeftLim.pco=%ld\0", setColor);
+          sprintf(tString, "Home.nLeftLim.pco=%ld", setColor);
           nexSerial.write(tString);
           FlushBuffer();
           memset(tString, '\0', sizeof(tString));
-          sprintf(tString, "Home.nRighLim.pco=%ld\0", setColor);
+          sprintf(tString, "Home.nRighLim.pco=%ld", setColor);
           nexSerial.write(tString);
           FlushBuffer();
           displaySawPosition (sCarriage.currentPosition(),1, 0);
           memset (tString, '\0', sizeof(tString));
           EEPROM.get(BACK_SLED, eeVal);
-          sprintf(tString, "Home.nSledBkLim.val=%ld\0", eeVal);
+          sprintf(tString, "Home.nSledBkLim.val=%ld", eeVal);
           nexSerial.write(tString);
           backLimit=eeVal;
           FlushBuffer();
@@ -359,14 +370,15 @@
           FlushBuffer();
           frontLimit = eeVal;
           memset(tString, '\0', sizeof(tString));
-          sprintf(tString, "Home.nSledBkLim.pco=%ld\0", setColor);
+          sprintf(tString, "Home.nSledBkLim.pco=%ld", setColor);
           nexSerial.write(tString);
           FlushBuffer();
           memset(tString, '\0', sizeof(tString));
-          sprintf(tString, "Home.nSledFrntLmt.pco=%ld\0", setColor);
+          sprintf(tString, "Home.nSledFrntLmt.pco=%ld", setColor);
           nexSerial.write(tString);
           FlushBuffer();
         }
+
     }
 
     /************************************************************
@@ -562,22 +574,6 @@
           
       }
    
-    /*************************************************************
-    *   void  btJoyPushCallback (void *ptr)
-    *     button call back to turn the joystick on and off
-    *     when off - the joystick will not respond.   Turn it off so
-    *     it is not used in the middle of automatic cutting
-    * ***********************************************************/
-    void btJoyPushCallback (NexDSButton *ptr)
-      {
-        uint32_t read_;
-        ptr->getValue(&read_);
-        if (read_)
-          jONOff = HIGH;
-        else
-          jONOff = LOW;
-      }
-
     /************************************************************
        void bRefreshPushCallback(void *ptr)
           Read the EEPROM again, fill the settings screen
@@ -607,6 +603,7 @@
                   strcpy(errorTxt, "\n\n\n\tsetting the saw parameters");
                   callError ();
                   bSetParamsPushCallback (&bSetParams);
+                  FlushBuffer();
                 }
               if (kerfSteps)
                 {
@@ -619,9 +616,7 @@
                       if (digitalRead (BACK_LIMIT))
                         bounceMotorOffLimit (&sSled, BACK_LIMIT, LOW);
                     }
-                  int jTemp = jONOff; 
-                  jONOff = LOW;
-                  FlushBuffer();
+                  
                   zeroPosition = sCarriage.currentPosition();
                   while (nextCut()  && !bStop && sCarriage.currentPosition() < stockSteps)   
                     {
@@ -629,14 +624,7 @@
                       if (bCarrMoved)
                         cycleSled();
                       delayMicroseconds(nCutDelay);
-                      curRead = nexSerial.read();
-                      if (curRead == 101)
-                        {
-                          curRead = nexSerial.read();     // read the page      
-                          curRead = nexSerial.read();     // read the control
-                          if (curRead == 34)             // pressed the stop button  
-                            btOnOffPushCallback(&btOnOff); // process the stop button
-                        }
+                      btOnOff.getValue (&bStop);
                     }
                   bZeroSawPopCallback(&bZeroSaw);
                 }
@@ -699,7 +687,6 @@
     *************************************************************/
     void bSledStopPushCallback(void *ptr) 
       {
-        long  lSawSteps;
         char  sSteps[12] = {'\0'};
 
         sprintf(sSteps, "%ld", sSled.currentPosition());
@@ -713,17 +700,20 @@
     void bLeftPushCallback(void *ptr) 
       {
           int cBuff = -1;
+          bool getVal_;
+          while (cBuff == -1 && !digitalRead(LEFT_LIMIT) && !bStop)
+            {
+              sCarriage.moveTo(sCarriage.currentPosition() - stepSize);
+              sCarriage.setSpeed (-maxMotorSpeed);   
+              while (!digitalRead(LEFT_LIMIT) &&  sCarriage.currentPosition() >= sCarriage.targetPosition())     
+                sCarriage.runSpeed();
 
-          sCarriage.move (sCarriage.currentPosition() -500000);
-          sCarriage.setSpeed (-maxMotorSpeed *.8);        
-          while (!digitalRead(LEFT_LIMIT) && cBuff == -1 && !bStop)
-            {     
-              sCarriage.runSpeed();
               cBuff = nexSerial.read ();
-            }
+              //getVal_ = btOnOff.getValue(&bStop);
+            } 
           if (digitalRead(LEFT_LIMIT))
             bounceMotorOffLimit (&sCarriage, LEFT_LIMIT, HIGH);
-          displaySawPosition (sCarriage.currentPosition(), 0, 0);
+          displaySawPosition (sCarriage.currentPosition(), 0, 0); 
       }
  
 /************************************************************
@@ -733,16 +723,20 @@
     void bUpPushCallback(void *ptr) 
       {
         int cBuff = -1;
+        bool getVal_;
      
-          sSled.move (sSled.currentPosition() -500000);
-          sSled.setSpeed (-maxMotorSpeed *.8);
-          while (!digitalRead(FRONT_LIMIT) && cBuff == -1 && !bStop)
-          {     
-            sSled.runSpeed();
-            cBuff = nexSerial.read ();
-          }
-         if (digitalRead(FRONT_LIMIT) && cBuff == -1)    // sled has hit the front limit and I need to bounce it
-            bounceMotorOffLimit (&sSled, FRONT_LIMIT, HIGH);
+        while (cBuff == -1 && !digitalRead(FRONT_LIMIT) && !bStop)
+          {
+            sSled.moveTo (sSled.currentPosition() -stepSize);
+            sSled.setSpeed (-maxMotorSpeed );
+            while (!digitalRead(FRONT_LIMIT) && sSled.currentPosition() >= sSled.targetPosition())    
+              sSled.runSpeed();
+
+            cBuff = nexSerial.read();
+            //getVal_ = btOnOff.getValue(&bStop);
+          } 
+        if (digitalRead(FRONT_LIMIT) && cBuff == -1)    // sled has hit the front limit and I need to bounce it
+          bounceMotorOffLimit (&sSled, FRONT_LIMIT, HIGH);
       }
 
 /************************************************************
@@ -752,14 +746,17 @@
     void bRightPushCallback(void *ptr) 
       {
           int cBuff = -1;
-        
-          sCarriage.moveTo (sCarriage.currentPosition() +500000);
-          sCarriage.setSpeed (maxMotorSpeed *.8 );
-          while (!digitalRead(RIGHT_LIMIT) && cBuff == -1 && !bStop)
-            {     
-              sCarriage.runSpeed();
-              cBuff = nexSerial.read ();
-            }
+          bool getVal_;
+          while (cBuff == -1 && !digitalRead(RIGHT_LIMIT) && !bStop) 
+            {
+              sCarriage.moveTo (sCarriage.currentPosition() + stepSize);
+              sCarriage.setSpeed (maxMotorSpeed );
+              while (!digitalRead(RIGHT_LIMIT)  && sCarriage.currentPosition() <= sCarriage.targetPosition())
+                sCarriage.runSpeed();
+
+              cBuff = nexSerial.read();
+              //getVal_ = btOnOff.getValue(&bStop);
+            } 
           if (digitalRead(RIGHT_LIMIT))
             bounceMotorOffLimit (&sCarriage, RIGHT_LIMIT, LOW);
           displaySawPosition (sCarriage.currentPosition(), 0, 0);  
@@ -772,14 +769,17 @@
     void bDownPushCallback(void *ptr) 
       {
           int cBuff = -1;    
+          bool getVal_;
+          while (cBuff == -1 && !digitalRead(BACK_LIMIT) && !bStop)
+            {
+              sSled.moveTo (sSled.currentPosition() + stepSize);
+              sSled.setSpeed (maxMotorSpeed);
+              while (!digitalRead(BACK_LIMIT) && sSled.currentPosition() <= sSled.targetPosition())
+                sSled.runSpeed();
           
-          sSled.move (sSled.currentPosition() +500000);
-          sSled.setSpeed (maxMotorSpeed *.8);
-          while (!digitalRead(BACK_LIMIT) && cBuff == -1 && !bStop)
-            {     
-              sSled.runSpeed();
-              cBuff = nexSerial.read ();
-            }
+              cBuff = nexSerial.read();
+              //getVal_ = btOnOff.getValue(&bStop);
+            } 
           if (digitalRead(BACK_LIMIT))
             bounceMotorOffLimit (&sSled, BACK_LIMIT, LOW);
       }
@@ -799,12 +799,18 @@
         if (!bStop)
         {
           sCarriage.move(leftLimit - 2000);
-          while (!digitalRead(LEFT_LIMIT) && !bStop && digitalRead(RIGHT_LIMIT) && sCarriage.currentPosition() != leftLimit - 2000)
-            sCarriage.run();
+          while (!digitalRead(LEFT_LIMIT) && !bStop && digitalRead(RIGHT_LIMIT) )
+            {
+              sCarriage.run();
+              btOnOff.getValue(&bStop);
+            }
           sCarriage.move(sCarriage.currentPosition() + 200);
           sCarriage.setSpeed(400);
           while (!digitalRead(SAW_ZERO) && !bStop)
-            sCarriage.runSpeed();
+            {
+              sCarriage.runSpeedToPosition();
+              btOnOff.getValue(&bStop);
+            }
           fingerCounter=0;
           whereSaw = RIGHT_EDGE;
           return sCarriage.currentPosition();
@@ -817,19 +823,32 @@
      **************************************************/
     int homeCarriage()
       {
+        int index_ = 0;
+        int lastChk_ =0;
+        bool powerOn;
+
         if (!bStop)
         {
           
           sCarriage.moveTo(sCarriage.currentPosition() - 200000); 
           sCarriage.setSpeed(-maxMotorSpeed);
-          while (!digitalRead(LEFT_LIMIT) && !bStop)
-            sCarriage.runSpeed();  
+          while (!digitalRead(LEFT_LIMIT) && !bStop && sCarriage.currentPosition() >= sCarriage.targetPosition())
+            {
+              sCarriage.runSpeed(); 
+              index_++;
+              if (index_ > lastChk_ + 150)
+                {
+                  powerOn = btOnOff.getValue(&bStop);       // 11_26_2022 added the check for the stop button
+                  lastChk_ = index_;
+                } 
+
+            } 
           if (bStop)
             {
               stopMotor();
               return LOW;
             }
-      //Bounce off the limit switch
+              //Bounce off the limit switch
           if (digitalRead(LEFT_LIMIT))
             bounceMotorOffLimit (&sCarriage, LEFT_LIMIT, HIGH);
               
@@ -846,10 +865,17 @@
           delayMicroseconds(nCutDelay);
           sCarriage.moveTo( 300000);
           sCarriage.setSpeed((maxMotorSpeed));
-          //sCarriage.setAcceleration (2000);
-          while (!digitalRead(RIGHT_LIMIT) && !bStop)
+          index_ = 0;
+          lastChk_ = 0;
+          while (!digitalRead(RIGHT_LIMIT) && !bStop && sCarriage.currentPosition() <= sCarriage.targetPosition() )
             {
               sCarriage.runSpeed(); 
+              index_++;
+              if (index_ > lastChk_ + 150)
+                {
+                  powerOn = btOnOff.getValue(&bStop);
+                  lastChk_ = index_;
+                } 
             }      
  
           if (bStop)
@@ -857,7 +883,7 @@
             stopMotor();
             return LOW;
           }
-      //Bounce the carriage off the limit stop    
+                      //Bounce the carriage off the limit stop    
           if (digitalRead(RIGHT_LIMIT))
             bounceMotorOffLimit (&sCarriage, RIGHT_LIMIT, LOW);
           if (bStop)
@@ -869,9 +895,20 @@
           EEPROM.put(RIGHT_CAR, rightLimit);
           // Move the sled back to the 0 position on the left limit switch
           sCarriage.moveTo(leftLimit - 100);
-          sCarriage.setSpeed ((-maxMotorSpeed *.9));
-          while ((!digitalRead(LEFT_LIMIT)) && !bStop)
-            sCarriage.runSpeed();  
+          sCarriage.setSpeed ((-maxMotorSpeed));
+          index_ = 0;
+          lastChk_ = 0;
+          while ((!digitalRead(LEFT_LIMIT)) && !bStop && sCarriage.currentPosition() >= sCarriage.targetPosition())
+            {
+              sCarriage.runSpeed();  
+              index_ ++;
+              if (index_ > lastChk_ + 150)
+                {
+                  powerOn = btOnOff.getValue(&bStop);    // 11_26_2022 added the check for the stop button
+                  lastChk_ = index_;
+                }
+                
+            }
           if (digitalRead(LEFT_LIMIT))
             bounceMotorOffLimit (&sCarriage, LEFT_LIMIT, HIGH);
   
@@ -891,16 +928,27 @@
      **************************************************/
     int homeSled()
     {
-      btOnOff.getValue(&bStop);
+      int count_ = 0;
+      int lastChk_ = 0;
+      bool  stopCheck_;
+
+      stopCheck_ = btOnOff.getValue(&bStop);
       if (!bStop)
         {
           
           sSled.moveTo(sSled.currentPosition() + 500000);
-          sSled.setSpeed (maxMotorSpeed *.8);
+          sSled.setSpeed (maxMotorSpeed);
 
-          while (!digitalRead(BACK_LIMIT) && !bStop)
-            sSled.runSpeed();          
-          
+          while (!digitalRead(BACK_LIMIT) && !bStop && sSled.currentPosition() <= sSled.targetPosition())
+            {
+              sSled.runSpeed(); 
+              count_++;
+              if (count_ > lastChk_ +150)
+                {
+                   stopCheck_ = btOnOff.getValue(&bStop);
+                   lastChk_ = count_;
+                }         
+            }
           if (bStop)
             {
               stopMotor();
@@ -914,10 +962,19 @@
           sSled.setCurrentPosition (0);
           // Now run to the other end of the ball screw to set the front limit of the sled
           sSled.moveTo(sSled.currentPosition() -300000);
-          sSled.setSpeed (-maxMotorSpeed *.8 );
-
-          while (!digitalRead(FRONT_LIMIT) && !bStop)
-            sSled.runSpeed();                 //  run sled through saw          
+          sSled.setSpeed (-maxMotorSpeed );
+          count_ = 0;
+          lastChk_ = 0;
+          while (!digitalRead(FRONT_LIMIT) && !bStop && sSled.currentPosition() >= sSled.targetPosition())
+            {
+              sSled.runSpeed();                 //  run sled through saw          
+              count_++;
+              if (count_ > lastChk_ +150)
+                {
+                  stopCheck_ = btOnOff.getValue(&bStop);
+                   lastChk_ = count_;
+                }        
+            }
       
           if (bStop)
             {
@@ -930,10 +987,21 @@
           EEPROM.put(FRONT_SLED, frontLimit);
           
           sSled.moveTo (backLimit + 50);
-          sSled.setSpeed (maxMotorSpeed * .8);
+          sSled.setSpeed (maxMotorSpeed );
+          count_ = 0;
+          lastChk_ = 0;
           // Move the sled back to the 0 position on the left limit switch
-          while (!digitalRead(BACK_LIMIT))
-            sSled.runSpeed();
+
+          while (!digitalRead(BACK_LIMIT) && !bStop)
+            {
+              sSled.runSpeed();
+              count_++;
+              if (count_ > lastChk_ +100)
+                {
+                   stopCheck_ = btOnOff.getValue(&bStop);
+                   lastChk_ = count_;
+                }         
+            }
               
           if (digitalRead(BACK_LIMIT))
             bounceMotorOffLimit (&sSled, BACK_LIMIT, LOW);
@@ -956,38 +1024,56 @@
      ***************************************************/
     bool  cycleSled()
        {
-          long  lSledLimit;
-          char  sSledLimit[12] = {'\0'};
+          int   iSledLimit = 0;
+          char  sSledLimit[15] = {'\0'};
           bool  bLim;
-
-          tSawStop.getText (sSledLimit, sizeof(sSledLimit));
-      
-          lSledLimit = atol ( sSledLimit);
-          bLim = HIGH;
+          int   counter_ = 0;
+          int   lasChk_ = 0;
+          bool  _stop;
+          memset (sSledLimit, '\0', sizeof(sSledLimit));
+          tSawStop.getText (sSledLimit, sizeof(sSledLimit));    
+          iSledLimit = atoi(sSledLimit);
+          if (iSledLimit != 0)
+            bLim = HIGH;
           if(!bStop)
             {
               if (!bLim)
                 sSled.moveTo (frontLimit);
               else
-                sSled.moveTo (lSledLimit);
-              sSled.setSpeed(-maxMotorSpeed *.8);
-              do                                //  run sled through saw
+                sSled.moveTo (iSledLimit);
+              sSled.setSpeed(-maxMotorSpeed );
+              while (!digitalRead(FRONT_LIMIT) && !bStop && sSled.currentPosition() >= sSled.targetPosition())                              //  run sled through saw
                 {
                   sSled.runSpeed();
+                  counter_++;
+                  if (counter_ > lasChk_ + 150)
+                    {
+                      _stop = btOnOff.getValue(&bStop);
+                      lasChk_ = counter_;
+                    }   
                 }
-              while (!digitalRead(FRONT_LIMIT) && sSled.currentPosition() != sSled.targetPosition());
-
               sSled.moveTo(backLimit);
               delayMicroseconds(nCutDelay);
-              sSled.setSpeed((maxMotorSpeed *.8));
-              do                               // bring sled back to starting position
+              sSled.setSpeed(maxMotorSpeed);
+              counter_ = 0;
+              lasChk_ = 0;
+              while (!digitalRead(BACK_LIMIT) && !bStop)                             // bring sled back to starting position
                 {
                   sSled.runSpeed();
-                }  while (!digitalRead(BACK_LIMIT));
-              
+                  counter_++;
+                  if (counter_ > lasChk_ + 150)
+                    {
+                      _stop = btOnOff.getValue(&bStop);
+                      lasChk_ = counter_;
+                    } 
+                }             
               if (digitalRead(BACK_LIMIT))
                 bounceMotorOffLimit (&sSled, BACK_LIMIT, LOW);
               }
+            if(!bStop)
+              return true;
+            else
+              return false; 
        }
  
     /*********************************************************************
@@ -1186,7 +1272,6 @@
     
       bStop = LOW;
       btOnOff.setValue(LOW);
-      //btOnOff.setText("Motors\r On");
       digitalWrite (enablePin, LOW);
       digitalWrite (sledEnablePin, LOW);  
     }
@@ -1258,32 +1343,12 @@
      * *************************************************************/
     void moveMotor (AccelStepper *motor, long howFast, int howMany)
       { 
-         motor->move(howMany);
-         motor->setSpeed (howFast);
+          motor->move(howMany);
+          motor->setSpeed (howFast);
          //while (!digitalRead(FRONT_LIMIT) && !digitalRead(BACK_LIMIT) && !digitalRead(LEFT_LIMIT) && !digitalRead(RIGHT_LIMIT))
-            motor->runSpeedToPosition();
+          motor->runSpeedToPosition();
       }
   
-  /*************************************************************************
-     *      void setJoyAverage ()
-     *        setting the average analog signal for the joystick.  Doing this will 
-     *        stop the jitter from raw reads.    The logic in the loop will only allow the motors to 
-     *        move if the delta from the average is large enough
-     ***************************************************************************/
-    void  setJoyAverage()
-        {
-            float xAv_ = 0;
-            float yAv_ = 0;
-
-            for (int x=0; x< 50; x++)
-              {
-                xAv_  += analogRead(xPin);
-                yAv_  += analogRead(yPin);
-                delayMicroseconds (50);
-              }
-            aveRead_x = xAv_ / 50;
-            aveRead_y = yAv_ / 50;
-        }
     
  //SETUP   *********************************** 
     void setup() {
@@ -1292,7 +1357,7 @@
       if (DEBUG)
         {
           Serial.begin (1000000);
-          delay(500);
+          delay(100);
         }
 
       nexInit(250000);        // start the serial port for the Nextion HMI 
@@ -1336,10 +1401,6 @@
       pinMode (RIGHT_LIMIT, INPUT_PULLUP);            // activate the pin for the right limit switch of the carriage
       pinMode (iStopPin, INPUT_PULLUP);               // activate the pin used for the interrupt and emergency kill switch
       pinMode (SAW_ZERO, INPUT_PULLUP);               // activate the pin for the wand to set the carriage to 0 point agains the saw
-      pinMode (moveCarriage, INPUT_PULLUP);           // activate the pin for the mechanical button that moves the carriage to next position
-      pinMode (xPin, INPUT);
-      pinMode (yPin, INPUT);
-    //  pinMode (jPin, INPUT);
       
     /*-----------------------------------------------------*/  
       sSled.setAcceleration (maxAcceleration);
@@ -1356,9 +1417,6 @@
       bStop = HIGH;
       jProgress.setValue(0);
       setLimitFields(0);
-    
-   
-      jONOff = LOW;
       
      // setJoyAverage();              // adjust for jitter in the analog reading.   Set the average voltage
     
@@ -1379,81 +1437,8 @@
  // RUN THE LOOP  
     void loop() 
       {
-       int x = 0;//   jONOff = HIGH;
           
-     // if (jONOff)                         // if the Joystick is enabled, move sled or carriage
-     //   {
-       /*  xVal = analogRead(A2);
-          yVal = analogRead (A1); 
- 
-          if((xVal-aveRead_x)< -100)      // move LEFT, with (-) motor speed
-            {
-              digitalWrite(directionPin, LOW);
-              sCarriage.move (sCarriage.currentPosition () - 100);
-              sCarriage.setSpeed (-maxMotorSpeed);
-              while (!digitalRead (LEFT_LIMIT) &&  x < 100)
-                {
-                  sCarriage.runSpeed();
-                  x++;
-                }
-              if (digitalRead(LEFT_LIMIT))
-                bounceMotorOffLimit (&sCarriage, LEFT_LIMIT, HIGH);
-            }
-        
-          if((xVal-aveRead_x) > 100)      //  move RIGHT with (+) motor speed
-            {
-              sCarriage.move (sCarriage.currentPosition () + 100);
-              sCarriage.setSpeed (maxMotorSpeed);
-              
-              while (!digitalRead (RIGHT_LIMIT) &&  x < 100)
-                {
-                  sCarriage.runSpeed();
-                  x++;
-                }
-              if (digitalRead(RIGHT_LIMIT))
-                bounceMotorOffLimit (&sCarriage, RIGHT_LIMIT, LOW);
-                              // xVal = analogRead(xPin);
-            }
-          if ((yVal - aveRead_y) > 100)               //  move FORWARD with (-) motor speed
-            {  
-              sSled.setSpeed(-maxMotorSpeed);
-              sSled.move(sSled.currentPosition() - 100);            
-              while (!digitalRead (FRONT_LIMIT) &&  x < 100)
-                {
-                  /*digitalWrite (sledStepPin, LOW);
-                  delayMicroseconds(150);
-                  digitalWrite (sledStepPin, HIGH);
-                  delayMicroseconds(20);
-                  x++;
-                  sSled.runSpeed();
-                  x++;
-                  
-                }
-              if (digitalRead(FRONT_LIMIT))
-                bounceMotorOffLimit (&sSled, FRONT_LIMIT, HIGH);
-                              }
-          if ((yVal - aveRead_y ) < -100)               //  move BACKWARD with (+) motor speed
-            {
-              //digitalWrite(sledDirPin, LOW);
-               sSled.move(sSled.currentPosition() + 100);  
-              sSled.setSpeed(maxMotorSpeed);             
-              while (!digitalRead (BACK_LIMIT) &&  x < 100)
-                {
-                  /*digitalWrite (sledStepPin, LOW);
-                  delayMicroseconds(150);
-                  digitalWrite (sledStepPin, HIGH);
-                  delayMicroseconds(20);
-                  sSled.runSpeed();
-                  x++;
-                }
-
-              if (digitalRead(BACK_LIMIT))
-                bounceMotorOffLimit (&sSled, BACK_LIMIT, LOW);
-                 
-            } */
-       // }  
-
-          nexLoop(nex_listen_list);           // Nextion screen object listener
+        nexLoop(nex_listen_list);           // Nextion screen object listener
         //  Blynk.run();
       }
     
