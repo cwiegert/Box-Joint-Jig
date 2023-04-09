@@ -32,6 +32,8 @@
   11/19/2022    CDW     -- LIVE and merge back into main line in git.   it's in production
   11/25/2022    CDW     -- Needed to adjust the left edge logic, had to hog out last cut 
                         -- disabled the WIFI, no longer needed as Joystick with the accelstepper was just too slow
+  04/08/2023    CDW     -- modified the autoStart button to test for a finger size instead of testing for end of stock.   Had to make sure
+                           the saw went past the end of stock and hogged out the partial finger instead of leaving material in a partial finger
 
 ****************************************************************************************************************************************/
 /* Comment the BLYNK_PRINT if you are not in debug mode*/
@@ -618,7 +620,7 @@
                     }
                   
                   zeroPosition = sCarriage.currentPosition();
-                  while (nextCut()  && !bStop && sCarriage.currentPosition() < stockSteps)   
+                  while (nextCut()  && !bStop && sCarriage.currentPosition() < stockSteps +fingerSteps + jointAdjust)   // 04_08_2023 modified to add sise of finger and slot
                     {
                       delayMicroseconds(nCutDelay);
                       if (bCarrMoved)
@@ -1024,15 +1026,15 @@
      ***************************************************/
     bool  cycleSled()
        {
-          int   iSledLimit = 0;
+          long   iSledLimit = 0;
           char  sSledLimit[15] = {'\0'};
-          bool  bLim;
+          bool  bLim = LOW;
           int   counter_ = 0;
           int   lasChk_ = 0;
           bool  _stop;
           memset (sSledLimit, '\0', sizeof(sSledLimit));
           tSawStop.getText (sSledLimit, sizeof(sSledLimit));    
-          iSledLimit = atoi(sSledLimit);
+          iSledLimit = atol(sSledLimit);
           if (iSledLimit != 0)
             bLim = HIGH;
           if(!bStop)
@@ -1088,10 +1090,8 @@
     {  
       bCarrMoved = false;
   
-       if (sCarriage.currentPosition()  >= stockSteps)//   beyond the edge of the stock, don't need to cut anything more
-         {  
+       if (sCarriage.currentPosition()  > stockSteps +fingerSteps + jointAdjust+ kerfSteps)//   beyond the edge of the stock, don't need to cut anything more
           return LOW;
-         }
             
        switch (whereSaw)
          {
@@ -1157,8 +1157,12 @@
                     sCarriage.moveTo ( firstCutRightSaw + (fingerCounter  * fingerSteps) + jointAdjust);
                   else
                     sCarriage.moveTo ((firstCutRightSaw - kerfSteps) + (fingerCounter  * fingerSteps) + jointAdjust);
-                else if (sCarriage.currentPosition () != stockSteps)
-                  sCarriage.moveTo ( firstCutRightSaw + (fingerCounter +1) * fingerSteps + jointAdjust);
+                else if (sCarriage.targetPosition () != stockSteps)
+                  {
+                    sCarriage.moveTo ( firstCutRightSaw + (fingerCounter +1) * fingerSteps + jointAdjust);
+                  }
+                else
+                    sCarriage.moveTo(stockSteps);
 
                 sCarriage.setSpeed(maxMotorSpeed);
                 while (sCarriage.currentPosition() != sCarriage.targetPosition() && !digitalRead(RIGHT_LIMIT))
@@ -1173,7 +1177,7 @@
             case HOG_OUT:         // check to see if we are goign to go past the end of the right edge, if not, start hogging
                                   //   if so, move the blade to just past the start of the kerf on the right edge and finish hogging
               {                       
-                if (sCarriage.currentPosition() - (.75 * kerfSteps) > movingRightEdge)
+                if (sCarriage.currentPosition() - (.75 * kerfSteps) > movingRightEdge)  // Keep hogging, haven't reached the kerf opening
                   {
                     sCarriage.moveTo (sCarriage.currentPosition() - (.75 * kerfSteps));
                     sCarriage.setSpeed(-maxMotorSpeed );
@@ -1184,7 +1188,7 @@
                   }
                 if (bInverted && fingerCounter == 1)
                   movingRightEdge += kerfSteps;  
-                if (sCarriage.currentPosition() - (.75 * kerfSteps) < movingRightEdge)
+                if (sCarriage.currentPosition() - (.75 * kerfSteps) < movingRightEdge)   // Done hogging out, need to move to next tab
                   {
                     whereSaw = RIGHT_EDGE;
                     bCarrMoved = false;
@@ -1442,4 +1446,4 @@
         //  Blynk.run();
       }
     
-      
+     
